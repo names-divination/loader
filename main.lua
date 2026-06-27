@@ -21,6 +21,5 @@ if not success or result == "false" or not result:find("http") then
     return
 end
 
--- ⭕ 認証を突破した時だけ、GASから送られてきたURLを使って本体を起動
 local mainScriptSuccess, mainScriptContent = pcall(function()
     return rawHttpGet(game, result)
