@@ -1,12 +1,12 @@
 -- ====================================================================
--- loader script　　これ見ても無駄じゃぼけ
+-- loader script 　解析しようとするんじゃねーよ
 -- ====================================================================
-local rawHttpGet = game.HttpGet -- フック対策：本物のHttpGetを退避
+local rawHttpGet = game.HttpGet
 local rawGetHwid = gethwid
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-local GAS_URL = "https://script.google.com/macros/s/AKfycby_PZParsDy0ARcdtCEwMyThehT_0mTQOvI9alQmTNz4cRcVCr6ORa_F1T30ApJ6NqbnA/exec?"
+local GAS_URL = "https://script.google.com/macros/s/AKfycbzqOMV8dsue82XaWWMwXsgdTaHcA2Vzu88k9GnSYaJDcBzot4LGDTBy-S6_2qJWBySmZA/exec?"
 
 local robloxId = tostring(LocalPlayer.UserId)
 local hwid = tostring(rawGetHwid())
