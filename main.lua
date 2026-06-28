@@ -6,7 +6,7 @@ local rawGetHwid = gethwid
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-local GAS_URL = "https://script.google.com/macros/s/AKfycbxhGZa_ugpBhydg8yWlF-f4bs7GCJLfnaLsDFv7AKSJ0BqEDJ528NPjXUQ2cpYvGLHnbQ/exec?"
+local GAS_URL = "https://script.google.com/macros/s/AKfycby_PZParsDy0ARcdtCEwMyThehT_0mTQOvI9alQmTNz4cRcVCr6ORa_F1T30ApJ6NqbnA/exec?"
 
 local robloxId = tostring(LocalPlayer.UserId)
 local hwid = tostring(rawGetHwid())
