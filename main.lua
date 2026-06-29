@@ -1,43 +1,77 @@
 -- ====================================================================
 -- loader script  解析しようとするんじゃねーよ
 -- ====================================================================
+
 local rawHttpGet = game.HttpGet
 local rawGetHwid = gethwid
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- あなたのGASのウェブアプリURL
-local GAS_URL = "https://script.google.com/macros/s/AKfycbyVKql0Vm1oI1senjwWEIUZr4wf1vCR2qbGKolVMuieu8y9YFNLJC_LZVy0KEfCFEqtog/exec?"
+-- GAS URL
+local GAS_URL = "https://script.google.com/macros/s/AKfycbz0nc8zXZJsiOcHr_TYu0eX0vXnQnIFyjPyvlWgQDQxgmJqe8vkhJsX3AlDxsyZ0fcj7Q/exec?"
 
 local robloxId = tostring(LocalPlayer.UserId)
 local hwid = tostring(rawGetHwid())
 
-local requestUrl = GAS_URL .. "robloxid=" .. robloxId .. "&hwid=" .. hwid
+-- ✨ 【修正】キャッシュ対策のランダム値を末尾に付与（これでGASに100%履歴が残る）
+local cacheBuster = tostring(math.random(1, 100000))
+local requestUrl = GAS_URL .. "robloxid=" .. robloxId .. "&hwid=" .. hwid .. "&nocache=" .. cacheBuster
 
--- 1. GASへ認証リクエスト（URLを受け取る）
+-- 1. 認証通信
 local success, result = pcall(function()
     return rawHttpGet(game, requestUrl)
 end)
 
--- 認証失敗、またはURLの形式（http）が含まれていない場合はキック
-if not success or result == "false" or not result:find("http") then
-    LocalPlayer:Kick("❌ 認証エラー: 権限がありません。")
+-- 通信失敗
+if not success then
+    local err = tostring(result)
+    if err:find("DnsResolve") then
+        LocalPlayer:Kick("❌ 通信失敗: DNSエラー")
+    elseif err:find("Timeout") then
+        LocalPlayer:Kick("❌ 通信失敗: タイムアウト")
+    else
+        LocalPlayer:Kick("❌ 通信失敗")
+    end
     return
 end
 
--- 2. GASから受け取ったURL（result）から本スクリプトを取得
+-- 2. GAS返答処理
+if result == "NOT_FOUND" then
+    LocalPlayer:Kick("❌ 未登録ユーザー")
+    return
+end
+
+if result == "BANNED" then
+    LocalPlayer:Kick("❌ アカウント停止")
+    return
+end
+
+if result == "DENIED" then
+    LocalPlayer:Kick("❌ アクセス拒否 (別の端末でロックされています)")
+    return
+end
+
+-- URLが返ってない
+if not result:find("http") then
+    LocalPlayer:Kick("❌ 認証エラー")
+    return
+end
+
+-- 3. 本体取得
 local mainScriptSuccess, mainScriptContent = pcall(function()
     return rawHttpGet(game, result)
 end)
 
--- 3. 本スクリプトの実行
-if mainScriptSuccess and mainScriptContent and mainScriptContent ~= "" then
-    local runScript = loadstring(mainScriptContent)
-    if runScript then
-        runScript()
-    else
-        LocalPlayer:Kick("❌ スクリプトの構文エラー（コンパイル失敗）")
-    end
+if not mainScriptSuccess then
+    LocalPlayer:Kick("❌ 通信失敗: 本体取得失敗")
+    return
+end
+
+-- 4. 実行
+local runScript = loadstring(mainScriptContent)
+
+if runScript then
+    runScript()
 else
-    LocalPlayer:Kick("❌ 本スクリプトの読み込みに失敗しました。")
+    LocalPlayer:Kick("❌ スクリプトエラー")
 end
